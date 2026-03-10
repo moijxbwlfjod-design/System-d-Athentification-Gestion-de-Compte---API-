@@ -27,9 +27,28 @@ class AuthController extends Controller
             'gender' => $request->gender,
         ]);
         Auth::login($user);
+        $token = $user->createToken($user->name);
         return response()->json([
             'message' => 'account created successfully',
-            'user' => $user
+            'token' => $token->plainTextToken
         ], 201);
+    }
+    
+    public function login(Request $request){
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:8'
+        ]);
+        if (Auth::attempt($credentials)){
+            $user = Auth::user();
+            $token = $user->createToken($user->id);
+            return response()->json([
+                'message' => 'welcome again',
+                'token' => $token
+            ], 200);
+        }
+        return response()->json([
+            'message' => 'please give valide cridentials'
+        ], 404);
     }
 }
