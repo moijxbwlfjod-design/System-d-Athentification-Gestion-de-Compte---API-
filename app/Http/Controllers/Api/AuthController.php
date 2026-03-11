@@ -7,25 +7,17 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 
 class AuthController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function register(Request $request){
-        $request->validate([
-            'name' => 'required|string|min:3',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'gender' => 'required|in:male,female'
-        ]);
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'gender' => $request->gender,
-        ]);
+    public function register(RegisterRequest $request){
+        $data = $request->validated();
+        $user = User::create($data);
         Auth::login($user);
         $token = $user->createToken($user->name);
         return response()->json([
@@ -34,17 +26,13 @@ class AuthController extends Controller
         ], 201);
     }
     
-    public function login(Request $request){
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:8'
-        ]);
+    public function login(LoginRequest $request){
+        $credentials = $request->validated();
         if (Auth::attempt($credentials)){
-            $user = Auth::user();
-            $token = $user->createToken($user->id);
+            $token = Auth::user()->createToken(Auth::user()->id);
             return response()->json([
                 'message' => 'welcome again',
-                'token' => $token
+                'token' => $token->plainTextToken
             ], 200);
         }
         return response()->json([
