@@ -22,10 +22,18 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'string|min:3|max:50',
-            'email' => 'email|unique:users,email',
-            'password' => 'min:8|max:50',
-            'gender' => 'in:male,female'
+            'name' => 'sometimes|string|min:3|max:50',
+            'email' => 'sometimes|email|unique:users,email',
+            'password' => 'sometimes|min:8|max:50',
+            'gender' => 'sometimes|in:male,female'
         ];
+    }
+
+    public function withValidator($validator){
+        $validator->after(function ($validator){
+            if(empty($this->all())){
+                $validator->errors()->add('fields', 'At lest, one field must be provided.');
+            }
+        });
     }
 }
