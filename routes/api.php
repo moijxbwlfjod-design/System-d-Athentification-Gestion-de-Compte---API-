@@ -13,7 +13,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/profile/{user}', [UserController::class, 'index']);
-    Route::put('/profile/{user}', [UserController::class, 'update']);
-    Route::delete('/profile/{user}', [UserController::class, 'destroy']);
+    Route::get('/profile/infos', [UserController::class, 'index']);
+    Route::put('/profile', [UserController::class, 'update']);
+    Route::delete('/profile', [UserController::class, 'destroy']);
 });
