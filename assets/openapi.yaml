@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: Auth & Profile API
+  description: API for authentication and user profile management
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000/api
+
+tags:
+  - name: Auth
+  - name: Profile
+
+paths:
+
+  /register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      description: Creates a new account and returns an authentication token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      description: Authenticates a user and returns a Bearer token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /profile/infos:
+    get:
+      tags: [Profile]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Profile information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+        401:
+          description: Unauthenticated
+
+  /profile:
+    put:
+      tags: [Profile]
+      summary: Update profile
+      description: |
+        Updates the authenticated user's profile.
+
+        **At least one field must be provided.**
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  maxLength: 50
+                  example: yahya ait lafkih
+                email:
+                  type: string
+                  format: email
+                  example: yahya2@gmail.com
+                password:
+                  type: string
+                  minLength: 8
+                  example: newpassword123
+                gender:
+                  type: string
+                  enum: [male, female]
+                  example: male
+      responses:
+        200:
+          description: Profile updated successfully
+
+        400:
+          description: Validation error
+
+        401:
+          description: Unauthenticated
+
+    delete:
+      tags: [Profile]
+      summary: Delete profile
+      description: Deletes the authenticated user's account permanently.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Profile deleted successfully
+
+        401:
+          description: Unauthenticated
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+
+  schemas:
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - gender
+      properties:
+        name:
+          type: string
+          example: yahya ait lafkih
+        email:
+          type: string
+          format: email
+          example: yahya@gmail.com
+        password:
+          type: string
+          example: yah_ya2012
+        gender:
+          type: string
+          enum: [male, female]
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: yahya@gmail.com
+        password:
+          type: string
+          example: yah_ya2012
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+          description: Bearer token used for authenticated requests
+          example: 4|MMP1qGKDqcpeH569XK8bO18mE9VyxbRb640cvTOB920d8c45
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: yahya ait lafkih
+        email:
+          type: string
+          example: yahya@gmail.com
+        gender:
+          type: string
+          example: male
